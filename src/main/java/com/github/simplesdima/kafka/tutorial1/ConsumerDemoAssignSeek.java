@@ -19,12 +19,13 @@ public class ConsumerDemoAssignSeek {
 
         String bootstrapServers = "127.0.0.1:9092";
         String topic = "first_topic";
+        String offsetReset = "earliest";
 
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsetReset);
 
         // creat consumer
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
