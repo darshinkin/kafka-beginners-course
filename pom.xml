@@ -23,6 +23,7 @@
     <modules>
         <module>kafka-basics</module>
         <module>kafka-produder-twitter</module>
+        <module>kafka-consumer-elasticsearch</module>
     </modules>
 
 </project>
