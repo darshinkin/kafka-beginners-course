@@ -26,6 +26,8 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonParser;
+
 public class ElasticSearchConsumer {
     public static Logger logger = LoggerFactory.getLogger(ElasticSearchConsumer.class.getName());
 
@@ -75,14 +77,21 @@ public class ElasticSearchConsumer {
             ConsumerRecords<String, String> records =
                     consumer.poll(Duration.ofMillis(100));
             for (ConsumerRecord<String, String> record : records) {
+                // 2 strategies
+                // kafka generic ID
+//                String id = record.topic() + "_" + record.partition() + "_" + record.offset();
+
+                // twitter specific id
+                String id = extractIdFromTweet(record.value());
+
                 // where we insert data into ElasticSearch
                 IndexRequest indexRequest = new IndexRequest(
                         "twitter",
-                        "tweets"
+                        "tweets",
+                        id
                 ).source(record.value(), XContentType.JSON);
                 IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
-                String id = indexResponse.getId();
-                logger.info(id);
+                logger.info(indexResponse.getId());
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -92,5 +101,14 @@ public class ElasticSearchConsumer {
         }
 
 //        client.close();
+    }
+
+    private static JsonParser jsonParser = new JsonParser();
+    private static String extractIdFromTweet(String tweetJson) {
+        // gson library
+        return jsonParser.parse(tweetJson)
+                .getAsJsonObject()
+                .get("id_str")
+                .getAsString();
     }
 }
