@@ -102,6 +102,12 @@ public class TweeterProducer {
         properties.put(KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
+        // create safe Producer
+        properties.put(ENABLE_IDEMPOTENCE_CONFIG, true);
+        properties.put(ACKS_CONFIG, "all");
+        properties.put(RETRIES_CONFIG, Integer.MAX_VALUE);
+        properties.put(MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5); // kafka 2.0 >= 1.1 so we can keep this as 5. Use 1 otherwise.
+
         // create the producer
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
         return producer;
