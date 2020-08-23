@@ -60,6 +60,8 @@ public class ElasticSearchConsumer {
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false"); // disable auto commit of offset
+        properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "10");
 
         // creat consumer
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
@@ -69,13 +71,13 @@ public class ElasticSearchConsumer {
 
     public static void main(String[] args) throws IOException {
         String topic = "twitter-tweets";
-
         RestHighLevelClient client = creatClient();
-
         KafkaConsumer<String, String> consumer = createConsumer(topic);
         while (true) {
             ConsumerRecords<String, String> records =
                     consumer.poll(Duration.ofMillis(100));
+
+            logger.info("Received " + records.count() + " records.");
             for (ConsumerRecord<String, String> record : records) {
                 // 2 strategies
                 // kafka generic ID
@@ -93,10 +95,18 @@ public class ElasticSearchConsumer {
                 IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
                 logger.info(indexResponse.getId());
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(10);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+            logger.info("Committing offsets...");
+            consumer.commitSync();
+            logger.info("Offsets have been committed");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
