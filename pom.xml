@@ -24,6 +24,7 @@
         <module>kafka-basics</module>
         <module>kafka-produder-twitter</module>
         <module>kafka-consumer-elasticsearch</module>
+        <module>kafka-strea-filter-tweets</module>
     </modules>
 
 </project>
